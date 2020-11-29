@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta charset="utf-8" />
+    <title>Leaflet with Geolocation</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+      integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+      crossorigin=""
+    />
+
+    <link rel="stylesheet" href="plugins\bootstrap.css" />
+    <link rel="stylesheet" href="plugins\L.Control.Pan.css" />
+    <link rel="stylesheet" href="plugins\L.Control.MousePosition.css" />
+    <link rel="stylesheet" href="plugins\L.Control.Sidebar.css" />
+    <link rel="stylesheet" href="plugins\Leaflet.PolylineMeasure.css" />
+    <link rel="stylesheet" href="plugins\easy-button.css" />
+    <link rel="stylesheet" href="splugins\leaflet.awesome-markers.css" />
+    <link rel="stylesheet" href="splugins\leaflet-mapkey/MapkeyIcons.css" />
+    <link rel="stylesheet" href="plugins\leaflet-mapkey/L.Icon.Mapkey.css" />
+
+    <script
+      src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+      integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+      crossorigin=""
+    ></script>
+
+    <script src="plugins\leaflet-providers.js"></script>
+    <script src="plugins\L.Control.Pan.js"></script>
+    <script src="plugins\L.Control.MousePosition.js"></script>
+    <script src="plugins\L.Control.Sidebar.js"></script>
+    <script src="plugins\Leaflet.PolylineMeasure.js"></script>
+    <script src="plugins\easy-button.js"></script>
+    <script src="plugins\leaflet.awesome-markers.min.js"></script>
+    <script src="plugins\leaflet-mapkey/L.Icon.Mapkey.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+      }
+      #map {
+        height: 100vh;
+      }
+    </style>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        /*************************************************************/
+
+        var myMap,
+          deviceCoords,
+          routeArray = [],
+          lyrOSM,
+          lyrDrk,
+          lyrWaterColor,
+          lyrLava,
+          lyrMblatlas,
+          ctlLayers,
+          ctlPan,
+          ctlMouseposition,
+          ctlPolyMsr,
+          ctlEasybutton,
+          ctlSidebar,
+          objBasemaps,
+          plylntest,
+          objOverlays,
+          mrkTest;
+
+        navigator.geolocation.getCurrentPosition(leafletInit);
+
+        function leafletInit(location) {
+          let coords = [location.coords.latitude, location.coords.longitude];
+          deviceCoords = {
+            lat: coords[0],
+            lng: coords[1],
+          };
+          routeArray.push(deviceCoords);
+          //if I change the definition of "map" to "mapDiv" below and further down on line 130 the map won't display.
+          myMap = L.map("map", {
+            center: coords,
+            zoom: 13,
+            zoomControl: false,
+            attributionControl: false,
+          });
+
+          lyrOSM = L.tileLayer.provider("OpenStreetMap.Mapnik");
+          lyrDrk = L.tileLayer.provider("Stadia.AlidadeSmoothDark");
+          lyrWaterColor = L.tileLayer.provider("Stamen.Watercolor");
+          lyrLava = L.tileLayer.provider("Thunderforest.SpinalMap");
+          lyrMblatlas = L.tileLayer.provider("Thunderforest.MobileAtlas");
+          myMap.addLayer(lyrOSM);
+
+          //checkout thunderforest.com's Mobile Atlas which requires an API key.
+          // ********* Setup Layer Control  ***************
+
+          objBasemaps = {
+            "Open Street Maps": lyrOSM,
+            "Dark Mode": lyrDrk,
+            Watercolor: lyrWaterColor,
+            Lava: lyrLava,
+            "Mobile Atlas": lyrMblatlas,
+          };
+
+          objOverlays = {};
+
+          ctlLayers = L.control.layers(objBasemaps, objOverlays).addTo(myMap);
+
+          ctlPan = L.control.pan().addTo(myMap);
+          ctlMouseposition = L.control.mousePosition().addTo(myMap);
+          ctlPolyMsr = L.control.polylineMeasure().addTo(myMap);
+          //easy button isn't showing up
+
+          ctlSidebar = L.control
+            .sidebar("sidebar", { position: "left", closeButton: true })
+            .addTo(myMap);
+
+          ctlEasybutton = L.easyButton(
+            "glyphicon-glyphicon-transfer",
+            function () {
+              ctlSidebar.toggle();
+            }
+          ).addTo(myMap);
+
+          L.marker(coords).addTo(myMap).bindPopup("You are here.").openPopup();
+
+          //TODO: CREATE HANDLER LOGIC SO THAT POLYLINE-MEASURE TOOL DOES NOT INTERFERE WITH TRAVELTIME API CALL 'handleMapClick'
+          myMap.on("click", handleMapClick);
+
+          //this is a test polyline
+          plylntest = L.polyline(
+            [
+              [
+                [40.648009, -73.967384],
+                [40.649491, -73.967877],
+                [40.648302, -73.971285],
+                [40.649021, -73.971298],
+              ],
+              [
+                [40.655769, -73.959674],
+                [40.655557, -73.968757],
+                [40.655557, -73.968757],
+                [40.654825, -73.973102],
+                [40.649021, -73.971298],
+              ],
+              [
+                [40.665948, -73.980159],
+                [40.664494, -73.976707],
+                [40.660913, -73.979364],
+                [40.658325, -73.974318],
+                [40.649021, -73.971298],
+              ],
+            ],
+            { color: "green" }
+          ).addTo(myMap);
+
+          mrkTest = L.marker([40.653571, -73.97044], {
+            draggable: true,
+          }).addTo(myMap);
+          mrkTest.bindTooltip("Mermaid");
+
+          //event handlers
+          mrkTest.on("dragend", function () {
+            mrkTest.setTooltipContent(
+              "Current Location: " +
+                mrkTest.getLatLng().toString() +
+                "<br>" +
+                "Distance to Kensington Dog Park: " +
+                mrkTest
+                  .getLatLng()
+                  .distanceTo([40.649021, -73.971298])
+                  .toFixed(0)
+            );
+          });
+        }
+
+        function handleMapClick(e) {
+          routeArray.push(e.latlng);
+          getRoute(...routeArray.slice(-2));
+        }
+
+        function handleLocateBtn(e) {
+          navigator.geolocation.getCurrentPosition();
+        }
+
+        const locateButton = document.getElementById("btnLocate");
+        locateButton.addEventListener("click", function () {
+          myMap.locate();
+        });
+
+        function getRoute(departureLatLng, ...arrivalLatLngs) {
+          //departuerLatLng is first element of routeArray, arrivalLatLngs is array of everything else
+          const apiKey = "60cf6646c39e45a0de83a59baa00a57d";
+          const appid = "dfc45614";
+          const headers = new Headers({
+            Host: "api.traveltimeapp.com",
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "X-Application-Id": appid,
+            "X-Api-Key": apiKey,
+          });
+          const data = {
+            locations: [
+              {
+                id: "home",
+                coords: {
+                  lat: departureLatLng.lat,
+                  lng: departureLatLng.lng,
+                },
+              },
+            ],
+            departure_searches: [
+              {
+                id: "facewoof",
+                departure_location_id: "home",
+                arrival_location_ids: [],
+                transportation: { type: "walking" },
+                departure_time: getDateString(),
+                properties: ["travel_time", "distance", "route"],
+              },
+            ],
+          };
+          arrivalLatLngs.forEach((point, index) => {
+            let id = "arrival" + index;
+            data.locations.push({
+              id: id,
+              coords: {
+                lat: point.lat,
+                lng: point.lng,
+              },
+            });
+            data.departure_searches[0].arrival_location_ids.push(id);
+          });
+          //data.departure_searches[0].arrival_location_ids.push("home"); //always go home after
+          console.log(data);
+          fetch("https://api.traveltimeapp.com/v4/routes", {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(data),
+          })
+            .then((res) => res.json())
+            .then(drawRoute)
+            .catch(console.error);
+        }
+
+        function drawRoute(serverJson) {
+          //TODO: remove previous route, if any
+          console.log(serverJson);
+          let properties = serverJson.results[0].locations[0].properties[0],
+            travelTime = properties.travel_time,
+            distance = properties.distance,
+            //convert TravelTime response into data structure usable by Leaflet
+            //travelTimeArray = properties.route.parts,
+            //travelTimeCoordArraysOnly = travelTimeArray.map(route => route.coords), //array of arrays of objects
+            //travelTimeObjectsOnly = travelTimeCoordArraysOnly.flat(), //array of objects, removing inner arrays
+            //leafletArrayOfArrays = travelTimeObjectsOnly.map(routeObj => Object.values(routeObj)), //[[40, -34], [40, -34.5], ...],
+            //routeArray = leafletArrayOfArrays
+            routeArray = properties.route.parts
+              .map((route) => route.coords)
+              .flat()
+              .map((routeObj) => Object.values(routeObj)),
+            polyline = L.polyline(routeArray, { color: "red" }).addTo(myMap);
+          myMap.fitBounds(polyline.getBounds());
+          L.marker(routeArray[routeArray.length - 1])
+            .addTo(myMap)
+            .bindPopup(`Travel Time: ${travelTime}<br>Distance: ${distance}`)
+            .openPopup();
+        }
+
+        function getDateString() {
+          let d = new Date();
+          return d.toISOString();
+        }
+
+        /*************************************************************/
+      });
+    </script>
+  </head>
+  <body>
+    <div id="sidebar" class="col-md-3">
+      <h1>leaflet-sidebar</h1>
+      <button id="btnLocate" class="btn btn-primary btn-block">
+        'Locate User'
+      </button>
+      <br />
+      <button id="btnWalkPlot" class="btn btn-success btn-block">
+        Enable 'Plan a walk! Feature'
+      </button>
+
+      <br />
+
+      <div col-md-3>
+        <button id="btnEdit" class="btn btn-success btn-block" disabled>
+          Edit Walk
+        </button>
+        <button id="btnSave" class="btn btn-success btn-block" disabled>
+          Save Walk
+        </button>
+        <button id="btnDelete" class="btn btn-success btn-block" disabled>
+          Delete Walk
+        </button>
+      </div>
+
+      <br />
+
+      <button id="btnTimeMap" class="btn btn-danger btn-block">
+        Enable 'Time Map Feature'
+      </button>
+
+      <br />
+
+      <button id="btnTimeMap" class="btn btn-warning btn-block">
+        Enable 'Travel Time Map Feature Feature'
+      </button>
+
+      <div class="input-group mb-3" disabled>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="enter an address"
+        />
+      </div>
+
+      <button id="btnLocate" class="btn btn-warning btn-lg" disabled>
+        Use My Location
+      </button>
+
+      <!-- "Enter Location or Address" - input field OR LocateMyPositionBtn
+      "Within" time scroll - select field
+      "By" transportation method - Public Transport/Car/Bicycle/Walk
+      "When is your trip?" - calendar select with default = NOW
+      "When each is filled out the GO button appears"
+      "When user clicks GO button then the ADD SHAPE button appears"
+      -->
+
+
+      <br />
+
+      <button id="btnTimeMatrix" class="btn btn-info btn-block">
+        Enable 'Travel Time Matrix Feature'
+      </button>
+    </div>
+    <div id="map" class="col-md-12"></div>
+  </body>
+</html>
