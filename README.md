@@ -11,7 +11,7 @@ Helpful Links:
 
 ###### I decided to use a no-sql database for [various reasons](https://www.mongodb.com/why-use-mongodb) and [Mongoose](https://mongoosejs.com/docs/api.html) is the nodeJS package from MongoDB.  I believe using Mongoose will help make the project a success because the goal of the application is to have a social media platform that will scale with the number of users, their interaction with one another using websocket technology superimposed over a map driven interface.  This will involve a diverse and large amount of data and traffic.
 
-__**Todo**__: design the project's data structure incorporating user data, map data and dynamic data traffic incorporating for both.
+
 
 
 ### **E**xpress
@@ -33,18 +33,38 @@ __**Todo**__: design the project's data structure incorporating user data, map d
 ##### List of Node Modules (not native):
 * Mongoose
 	* [Mongoose npm package](https://www.npmjs.com/package/mongoose) 	
+
 * React
 	* [React npm package](https://www.npmjs.com/package/react)
+
 * LeafletJS
 	* [Leaflet npm package](https://www.npmjs.com/package/leaflet)
-	* [Leaflet React npm package](https://www.npmjs.com/package/react-leaflet)
- 	* [Leaflet Homepage](https://leafletjs.com/)
- 	* [React Leaflet Homepage](https://react-leaflet.js.org/)
+	* [Leaflet Github Repo](https://github.com/Leaflet/Leaflet)
+	* [Leaflet Homepage](https://leafletjs.com/)
+ 	
+* React LeafletJS
+	* [React Leaflet npm package](https://www.npmjs.com/package/react-leaflet)
+	* [React Leaflet Github Repo](https://github.com/PaulLeCam/react-leaflet)  
+	* [React Leaflet Homepage](https://react-leaflet.js.org/)
+
 * Travel Time API
 	* [Travel-Time npm package](https://www.npmjs.com/package/traveltime-api-sdk-ts)
-	* [Travel-Time software development package](https://github.com/traveltime-dev/traveltime-sdk-openAPI)
+	* [Travel-Time software development package (Github Repo)](https://github.com/traveltime-dev/traveltime-sdk-openAPI)
 	* [Company Homepage](https://traveltime.com/)
 	* [API Documentation](https://traveltime.com/docs/api/overview/introduction)
 	* [Front End API Example](https://app.traveltime.com/reachableFrom/33%2C%20Argyle%20Road%2C%20Ditmas%20Park%2C%20Brooklyn%2C%20New%20York%2C%20Kings%20County%2C%20New%20York%2C%2011226%2C%20United%20States%20of%20America@lat40.6488008@lng-73.9673074/within/30/minutes/public-transport/radius)
-* 
+	* Feature List:
+		* Send a meetup marker to another user.
+		* Find other active users within a user-specified time radius.
+
+* Socket.io
+	*  [Socket.io npm package](https://www.npmjs.com/package/socket.io)
+	*  [Socket.io Github Repo](https://github.com/socketio/socket.io)
+
+---
+### ToDo List:
+1.  design the project's data structure incorporating user data, map data and dynamic data traffic between the two over a websocket connection.
+2.  refactor the travel-time api code using the npm module and organize by feature.
+
+
 
